@@ -34,11 +34,16 @@ func main() {
 
 	news := finder.NewsInfo{}
 
-	err = client.SendRequest(request, &news)
-	if err != nil {
-		fmt.Printf("Error %s", err.Error())
-		return
-	}
+	sync := make(chan error)
+	go func() {
+		err = client.SendRequest(request, &news)
+		if err != nil {
+			fmt.Printf("Error %s", err.Error())
+			return
+		}
+		sync <- err
+	}()
+	<-sync
 
 	for _, item := range news.Articles {
 		fmt.Println(item.Title)
