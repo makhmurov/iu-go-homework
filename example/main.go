@@ -13,7 +13,7 @@ func main() {
 		query = os.Args[1]
 	}
 
-	fmt.Println("hi")
+	fmt.Println("Loading...")
 	client := finder.NewClient("https://newsapi.org/v2", os.Getenv("DATA_PROVIDER_APIKEY"))
 
 	var params = finder.UrlParams{

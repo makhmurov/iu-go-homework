@@ -44,14 +44,14 @@ func (client *Client) SendRequest(request *http.Request, result interface{}) err
 
 	res, err := client.HTTPClient.Do(request)
 	if err != nil {
-		return fmt.Errorf("client error: %s", err.Error())
+		return fmt.Errorf("client: %s", err.Error())
 
 	}
 
-	fmt.Println(res.StatusCode, ":", res.Status)
-
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("request failed, code %d", res.StatusCode)
+		return fmt.Errorf("request, code: %s", res.Status)
+	} else {
+		fmt.Println(res.StatusCode)
 	}
 
 	defer res.Body.Close()
