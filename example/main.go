@@ -8,11 +8,16 @@ import (
 )
 
 func main() {
+	query := "tesla"
+	if len(os.Args) > 1 {
+		query = os.Args[1]
+	}
+
 	fmt.Println("hi")
 	client := finder.NewClient("https://newsapi.org/v2", os.Getenv("DATA_PROVIDER_APIKEY"))
 
 	var params = finder.UrlParams{
-		"q":        "tesla",
+		"q":        query,
 		"form":     "2021-06-21",
 		"sortBy":   "publishedAt",
 		"pageSize": "5",
