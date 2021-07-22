@@ -13,4 +13,7 @@ func main() {
 
 	task2_res := homework.SolutionBinaryGap(68421398)
 	fmt.Println("# SolutionBinaryGap:", task2_res)
+
+	task4_res := homework.GetUniqCount([]int{3, 8, 9, 7, 3, 5, 8, 9, 6})
+	fmt.Println("# GetUniqCount:", task4_res)
 }
