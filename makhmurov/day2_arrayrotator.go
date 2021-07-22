@@ -1,7 +1,5 @@
 package makhmurov
 
-import "fmt"
-
 /*
 # ArrayRotator
 Дан массив arr, состоящий из N целых чисел. Вращение массива - это сдвиг
@@ -28,7 +26,6 @@ func ArrayRotate(arr []int, count int) []int {
 	shift := (high + count%high) % high
 	copy(res[shift:], arr[:high-shift])
 	copy(res[:shift], arr[high-shift:])
-	fmt.Println(res)
 	return res
 }
 
@@ -44,6 +41,5 @@ func ArrayRotate2(arr []int, count int) []int {
 		dsti := (shift + i) % high
 		res[dsti] = arr[i]
 	}
-	fmt.Println(res)
 	return res
 }
