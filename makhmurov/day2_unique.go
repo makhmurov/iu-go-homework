@@ -20,8 +20,6 @@ func GetUniqCount(arr []int) int {
 		if used == 1 {
 			unique++
 		}
-		//unique += 1*(used - 1)
 	}
-	//unique = len(arr) - unique
 	return unique
 }
