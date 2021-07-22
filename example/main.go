@@ -2,15 +2,16 @@ package main
 
 import (
 	"fmt"
+	finder "iu-go-homework"
 	"net/http"
 	"os"
 )
 
 func main() {
 	fmt.Println("hi")
-	client := NewClient("https://newsapi.org/v2", os.Getenv("DATA_PROVIDER_APIKEY"))
+	client := finder.NewClient("https://newsapi.org/v2", os.Getenv("DATA_PROVIDER_APIKEY"))
 
-	var params = UrlParams{
+	var params = finder.UrlParams{
 		"q":        "tesla",
 		"form":     "2021-06-21",
 		"sortBy":   "publishedAt",
@@ -26,7 +27,7 @@ func main() {
 
 	_ = err
 
-	news := NewsInfo{}
+	news := finder.NewsInfo{}
 
 	err = client.SendRequest(request, &news)
 	if err != nil {
