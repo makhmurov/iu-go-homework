@@ -37,13 +37,14 @@ func main() {
 	sync := make(chan error)
 	go func() {
 		err = client.SendRequest(request, &news)
-		if err != nil {
-			fmt.Printf("Error %s", err.Error())
-			return
-		}
 		sync <- err
+		close(sync)
 	}()
-	<-sync
+	err = <-sync
+	if err != nil {
+		fmt.Printf("Error %s", err.Error())
+		return
+	}
 
 	for _, item := range news.Articles {
 		fmt.Println(item.Title)
