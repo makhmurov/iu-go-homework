@@ -63,7 +63,7 @@ func NewClient(url, key string) *Client {
 		BaseUrl: url,
 		ApiKey:  key,
 		HTTPClient: &http.Client{
-			Timeout: time.Second,
+			Timeout: time.Minute,
 		},
 	}
 }

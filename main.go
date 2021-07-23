@@ -36,16 +36,13 @@ func main() {
 
 	var news = spaceflight.NewsList{}
 
-	/*
-		sync := make(chan error)
-		go func() {
-
-			sync <- err
-			close(sync)
-		}()
-		err = <-sync
-	*/
-	err = client.SendRequest(request, &news.Articles)
+	sync := make(chan error)
+	go func() {
+		err = client.SendRequest(request, &news.Articles)
+		sync <- err
+		close(sync)
+	}()
+	err = <-sync
 	if err != nil {
 		fmt.Printf("Error %s", err.Error())
 		return
