@@ -1,111 +1,63 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
+	spaceflight "iu-go-homework/spaceflight"
 	"net/http"
 	"os"
-	"time"
 )
 
-type Client struct {
-	BaseUrl    string
-	ApiKey     string
-	HTTPClient *http.Client
-}
-
-func NewClient(url, key string) *Client {
-	return &Client{
-		BaseUrl: url,
-		ApiKey:  key,
-		HTTPClient: &http.Client{
-			Timeout: time.Minute,
-		},
-	}
-}
-
-type NewsInfo struct {
-	Status       string `json:"status"`
-	TotalResults int    `json:"totalResults"`
-	Articles     []struct {
-		Source struct {
-			ID   interface{} `json:"id"`
-			Name string      `json:"name"`
-		} `json:"source"`
-		Author      interface{} `json:"author"`
-		Title       string      `json:"title"`
-		Description string      `json:"description"`
-		URL         string      `json:"url"`
-		URLToImage  string      `json:"urlToImage"`
-		PublishedAt time.Time   `json:"publishedAt"`
-		Content     string      `json:"content"`
-	} `json:"articles"`
-}
-
 func main() {
-	fmt.Println("hi")
-	client := NewClient("https://newsapi.org/v2", os.Getenv("DATA_PROVIDER_APIKEY"))
-
-	var params map[string]string = map[string]string{
-		"q":        "tesla",
-		"form":     "2021-06-21",
-		"sortBy":   "publishedAt",
-		"apiKey":   client.ApiKey,
-		"pageSize": "5",
-		"language": "ru",
-	}
-
 	query := ""
+	if len(os.Args) > 1 {
+		query = os.Args[1]
+	}
+	client := spaceflight.NewClient(
+		"https://api.spaceflightnewsapi.net/v3",
+		os.Getenv("DATA_PROVIDER_APIKEY"),
+	)
 
-	for key, value := range params {
-		if len(query) > 0 {
-			query += "&"
-		}
-		query += key + "=" + value
+	var params = spaceflight.UrlParams{
+		"_limit":         "5",
+		"_start":         "0",
+		"title_contains": query,
 	}
 
 	request, err := http.NewRequest(
 		http.MethodGet,
-		fmt.Sprintf("%s/everything?%s", client.BaseUrl, query),
+		fmt.Sprintf("%s/articles?%s", client.BaseUrl, params.Query()),
 		nil,
 	)
 
-	_ = err
-
-	res, err := client.HTTPClient.Do(request)
 	if err != nil {
-		fmt.Printf("Error: %s", err.Error())
+		fmt.Printf("Error %s", err.Error())
 		return
 	}
 
-	fmt.Println(res.StatusCode, ":", res.Status)
+	var news = spaceflight.NewsList{}
 
-	if res.StatusCode != http.StatusOK {
-		fmt.Println("Error request:", res.StatusCode)
-		return
-	}
+	/*
+		sync := make(chan error)
+		go func() {
 
-	// var buf []byte = make([]byte, 100)
-	// count, err := res.Body.Read(buf)
-	// fmt.Println(count)
-	// fmt.Println(err)
-	// fmt.Println(string(buf))
-
-	// var temp interface{} = new(interface{})
-
-	news := NewsInfo{}
-
-	defer res.Body.Close()
-
-	err = json.NewDecoder(res.Body).Decode(&news)
+			sync <- err
+			close(sync)
+		}()
+		err = <-sync
+	*/
+	err = client.SendRequest(request, &news.Articles)
 	if err != nil {
-		fmt.Println("decode", err.Error())
+		fmt.Printf("Error %s", err.Error())
 		return
 	}
-
-	//fmt.Printf("%#v", news)
 
 	for _, item := range news.Articles {
 		fmt.Println(item.Title)
 	}
+
+	// Get article counts
+	// Get article short list
+
+	// Get command
+	// Get article
 }
