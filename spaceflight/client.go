@@ -91,10 +91,10 @@ func (client *Client) SendRequest(request *http.Request, result interface{}) err
 
 	if res.StatusCode != http.StatusOK {
 		return fmt.Errorf("request, code: %s", res.Status)
-	} else {
+	} /*else {
 		fmt.Println(res.StatusCode)
 		//PrintResponse(res)
-	}
+	}*/
 
 	err = json.NewDecoder(res.Body).Decode(result)
 	if err != nil {
