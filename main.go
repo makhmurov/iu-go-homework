@@ -5,6 +5,7 @@ import (
 	spaceflight "iu-go-homework/spaceflight"
 	"net/http"
 	"os"
+	"sync"
 )
 
 func main() {
@@ -17,40 +18,73 @@ func main() {
 		os.Getenv("DATA_PROVIDER_APIKEY"),
 	)
 
-	var params = spaceflight.UrlParams{
-		"_limit":         "5",
-		"_start":         "0",
-		"title_contains": query,
+	ch := make(chan spaceflight.Article)
+	wg := &sync.WaitGroup{}
+
+	const articlesCount = 3
+	const pageCount = 4
+
+	for i := 0; i < pageCount; i++ {
+		wg.Add(1)
+		go func(reqi int, channel2 chan spaceflight.Article) {
+			defer wg.Done()
+			var news = spaceflight.NewsList{}
+			var params = spaceflight.UrlParams{
+				"_limit":         fmt.Sprint(articlesCount),
+				"_start":         fmt.Sprint(reqi * articlesCount),
+				"title_contains": query,
+			}
+
+			request, err := http.NewRequest(
+				http.MethodGet,
+				fmt.Sprintf("%s/articles?%s", client.BaseUrl, params.Query()),
+				nil,
+			)
+
+			if err != nil {
+				fmt.Printf("Error %s", err.Error())
+				return
+			}
+
+			err = client.SendRequest(request, &news.Articles)
+
+			if err != nil {
+				fmt.Printf("Error %s", err.Error())
+				return
+			}
+
+			fmt.Printf("\n=== Page %d ===\n", reqi)
+
+			for _, item := range news.Articles {
+				channel2 <- item
+			}
+		}(i, ch)
 	}
 
-	request, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("%s/articles?%s", client.BaseUrl, params.Query()),
-		nil,
-	)
-
-	if err != nil {
-		fmt.Printf("Error %s", err.Error())
-		return
-	}
-
-	var news = spaceflight.NewsList{}
-
-	sync := make(chan error)
 	go func() {
-		err = client.SendRequest(request, &news.Articles)
-		sync <- err
-		close(sync)
+		for article := range ch {
+			fmt.Println(article.Title)
+		}
 	}()
-	err = <-sync
-	if err != nil {
-		fmt.Printf("Error %s", err.Error())
-		return
-	}
 
-	for _, item := range news.Articles {
-		fmt.Println(item.Title)
-	}
+	fmt.Println("wait go-s")
+	wg.Wait()
+	fmt.Println("wait done")
+	close(ch)
+	fmt.Println("Program stop")
+
+	//
+
+	/*
+		if err != nil {
+			fmt.Printf("Error %s", err.Error())
+			return
+		}
+
+		for _, item := range news.Articles {
+			fmt.Println(item.Title)
+		}
+	*/
 
 	// Get article counts
 	// Get article short list
